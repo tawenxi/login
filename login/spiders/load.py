@@ -29,9 +29,17 @@ class LoadSpider(scrapy.Spider):
 	start_urls = ['http://10.177.9.37:81/suichuan/']
 	login_url = 'http://10.177.9.37:81/suichuan/loginJian.do'
 	cookies = None
+	mydoc = None
 
 	headers={'Accept': 'text/html, application/xhtml+xml, */*','Referer': 'http://10.177.9.37:81/suichuan/index.do','Accept-Language': 'zh-CN','User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko','Accept-Encoding': 'gzip, deflate','Host': '10.177.9.37:81','Connection': 'Keep-Alive','Pragma': 'no-cache'} 
 
+
+	def __init__(self, mydoc=None, *args, **kwargs):
+	    super(LoadSpider, self).__init__(*args, **kwargs)
+
+	    if mydoc:
+	    	self.mydoc = mydoc.split('.')
+	    pass
 
 
 	def parse(self, response):
@@ -96,21 +104,28 @@ class LoadSpider(scrapy.Spider):
 	def parse20(self, response):
 
 
+		if not self.mydoc:
+			node_list=response.xpath('//tr[@class="idx_item2a"]')
 
-		node_list=response.xpath('//tr[@class="idx_item2a"]')
-
-		print('新到来文数据',len(node_list))
+			print('新到来文数据',len(node_list))
 
 
-		for node in node_list:
+			for node in node_list:
 
-			docid = node.xpath('.//a/@href').get()
+				docid = node.xpath('.//a/@href').get()
 
-			docidstr=docid[(docid.index("&NDOCID=")+8):docid.index("&NDOCSORTID")]
+				docidstr=docid[(docid.index("&NDOCID=")+8):docid.index("&NDOCSORTID")]
 
-			link = self.downloadby(docidstr)
+				link = self.downloadby(docidstr)
 
-			yield scrapy.Request(url=link,callback=self.parse2,dont_filter=True,meta={'cookiejar': 1})
+				yield scrapy.Request(url=link,callback=self.parse2,dont_filter=True,meta={'cookiejar': 1})
+		else:
+
+			for docidstr in self.mydoc:
+				link = self.downloadby(docidstr)
+
+				yield scrapy.Request(url=link,callback=self.parse2,dont_filter=True,meta={'cookiejar': 1})
+				pass
 
 	def downloadby(self, docidstr):
 		link = 'http://10.177.9.37:81/suichuan/document/ifr_docinfo_file.jsp?NDOCID={}&NDOCSORTID=2&subFrame=doWaiting&NPROCID=19&showCPQB=&newCPQB=0'.format(docidstr)

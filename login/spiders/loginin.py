@@ -113,7 +113,7 @@ class LogininSpider(scrapy.Spider):
         #   f.write(response.body)
         # print(response.body)
 
-        print(response.text)
+        #print(response.text)
         
         node_list=response.xpath('//tr[@class="underline1"]')
 
