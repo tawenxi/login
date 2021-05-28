@@ -98,14 +98,19 @@ class LogininSpider(scrapy.Spider):
 
         print(f"{startdate}到{enddate}")
 
-        for x in range(1,2,1):
+        for x in range(1,4,1):
             url='http://10.177.9.37:81/suichuan/document/ifr_list_query.jsp?subFrame=queryReceive&Page={}&CFWDW=&beginDate={}&endDate={}&CZTC=&CBT=&CWENHAO=&doctype=&gwSDate=&gwEDate=&year=&docFrom=&docStatus=3&sort=default&archiveType='.format(x,startdate,enddate)
 
             print(url)
             yield scrapy.Request(url=url,callback=self.parse2,dont_filter=True,meta={'cookiejar': response.meta['cookiejar']})
             pass
 
+        for x in range(1,5,1):
+            url='http://10.177.9.37:81/suichuan/document/ifr_list_query.jsp?subFrame=queryReceive&Page={}&CFWDW=&beginDate=&endDate=&CZTC=&CBT=&CWENHAO=&doctype=&gwSDate=&gwEDate=&year=&docFrom=&docStatus=0&sort=default&archiveType='.format(x)
 
+            print(url)
+            yield scrapy.Request(url=url,callback=self.parse2,dont_filter=True,meta={'cookiejar': response.meta['cookiejar']})
+            pass
 
     def parse2(self, response):
 
