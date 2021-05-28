@@ -1,0 +1,7 @@
+.ipynb_checkpoints
+*.pyc
+*.txt
+/PIPENV_VENV_IN_PROJECT
+/login/__pycache__
+/login/spiders/__pycache__
+/login/images
