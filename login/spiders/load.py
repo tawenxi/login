@@ -104,27 +104,33 @@ class LoadSpider(scrapy.Spider):
 
 		for node in node_list:
 
-			biaoti = node.xpath('.//a/@title').get()
-
 			docid = node.xpath('.//a/@href').get()
 
-			docid_str=docid[(docid.index("&NDOCID=")+8):docid.index("&NDOCSORTID")]
+			docidstr=docid[(docid.index("&NDOCID=")+8):docid.index("&NDOCSORTID")]
 
-			link = 'http://10.177.9.37:81/suichuan/document/ifr_docinfo_file.jsp?NDOCID={}&NDOCSORTID=2&subFrame=doWaiting&NPROCID=19&showCPQB=&newCPQB=0'.format(docid_str)
+			link = self.downloadby(docidstr)
 
+			yield scrapy.Request(url=link,callback=self.parse2,dont_filter=True,meta={'cookiejar': 1})
 
-			yield scrapy.Request(url=link,callback=self.parse2,dont_filter=True,meta={'biaoti':biaoti,'cookiejar': response.meta['cookiejar']})
+	def downloadby(self, docidstr):
+		link = 'http://10.177.9.37:81/suichuan/document/ifr_docinfo_file.jsp?NDOCID={}&NDOCSORTID=2&subFrame=doWaiting&NPROCID=19&showCPQB=&newCPQB=0'.format(docidstr)
+		return link
+		
 
 
 	def parse2(self, response):
 
 
 
-		biaoti = response.meta['biaoti']
+		#biaoti = response.meta['biaoti']
 		file_nodes = response.xpath('//tr[@class="secondRightContent"]')
 		#print(len(file_nodes))
 
-		for node in file_nodes:
+		for index, node in enumerate(file_nodes):
+			wenjianming = node.xpath('.//a/text()').get()
+			if index == 0:
+				biaoti = wenjianming
+				pass
 			filepagelink = node.xpath('.//a/@href').get()
 			wenjianming = node.xpath('.//a/text()').get()
 			filepagelink = 'http://10.177.9.37:81/suichuan/document/'+filepagelink
