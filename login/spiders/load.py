@@ -200,6 +200,9 @@ class LoadSpider(scrapy.Spider):
 			request.urlretrieve(url,os.path.join(partpath,imagename))
 
 
+			print('下载成功')
+
+
 
 
 
