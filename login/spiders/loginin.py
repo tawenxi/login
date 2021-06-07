@@ -8,6 +8,7 @@ import urllib.request
 from scrapy.http import Request,FormRequest
 import os
 import sys
+import datetime
 
 from PIL import Image
 fpath = os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
@@ -94,13 +95,18 @@ class LogininSpider(scrapy.Spider):
             dbconn.rollback()
         pass
 
+        now = datetime.datetime.now()
+        delta = datetime.timedelta(days=15)
+        n_days = now - delta
+       
+
         enddate = time.strftime("%Y-%m-%d")
 
         print(f"{startdate}到{enddate}")
 
-        for x in range(1,4,1):
-            url='http://10.177.9.37:81/suichuan/document/ifr_list_query.jsp?subFrame=queryReceive&Page={}&CFWDW=&beginDate={}&endDate={}&CZTC=&CBT=&CWENHAO=&doctype=&gwSDate=&gwEDate=&year=&docFrom=&docStatus=3&sort=default&archiveType='.format(x,startdate,enddate)
-
+        for x in range(1,10,1):
+            url='http://10.177.9.37:81/suichuan/document/ifr_list_query.jsp?subFrame=queryReceive&Page={}&CFWDW=&beginDate={}&endDate={}&CZTC=&CBT=&CWENHAO=&doctype=&gwSDate=&gwEDate=&year=&docFrom=&docStatus=&sort=default&archiveType='.format(x,n_days,enddate)
+                
             print(url)
             yield scrapy.Request(url=url,callback=self.parse2,dont_filter=True,meta={'cookiejar': response.meta['cookiejar']})
             pass

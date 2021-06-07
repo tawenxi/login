@@ -49,6 +49,10 @@ class LoginPipeline:
             except Exception as e:
                 print(f">>存储失败>>数据<{item['docid']}>{e}")
                 self.conn.rollback()
+                self.cursor.execute('UPDATE documents SET zhuangtai = "{}" WHERE docid = "{}"'.format(item['zhuangtai'],item['docid']))
+                print(f"数据<{item['docid']}>数据更新中...")
+                # 数据提交到数据库
+                self.conn.commit()
             return item
             pass
 
