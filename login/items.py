@@ -24,3 +24,4 @@ class BmwItem(scrapy.Item):
     urls = scrapy.Field()
     partname = scrapy.Field()
     wenjianming = scrapy.Field()
+    # date_time = scrapy.Field()

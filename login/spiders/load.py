@@ -11,13 +11,15 @@ import sys
 from login.items import BmwItem
 
 from urllib import request
-
+import re
+from datetime import datetime
 from PIL import Image
+
 fpath = os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
 ffpath = os.path.abspath(os.path.join(fpath,".."))
 
 sys.path.append(fpath)
-
+from spiders.fpymysql.gettext import *
 import spiders.fpymysql.libmysql as mysqlhelper
 
 
@@ -46,7 +48,7 @@ class LoadSpider(scrapy.Spider):
 		# 拼凑当前验证码对应的 url
 		print("*"*20)
 		img_url = 'http://10.177.9.37:81/suichuan/validateCode'
-		yield scrapy.Request(url=img_url, meta={'cookiejar': 1}, callback=self.parse_postdata,dont_filter=True)
+		yield scrapy.Request(url=img_url, meta={'cookiejar': 1}, callback=self.parse_postdata,dont_filter=True,headers=self.headers)
 
 	def parse_postdata(self, response):
 
@@ -62,12 +64,13 @@ class LoadSpider(scrapy.Spider):
 		fp.write(response.body)
 		fp.close()
 
-		image = Image.open('验证码.png')
-		image.show()
+		captcha = gettext()
+		captcha = captcha.replace('B', "8") 
+		print("识别验证码为："+captcha)
 
 
 
-		captcha = input("请输入验证码： ")
+		# captcha = input("请输入验证码： ")
 		# 完善 formdata中空着的 numcode
 		form_data['validateCode'] = captcha
 
@@ -97,7 +100,7 @@ class LoadSpider(scrapy.Spider):
 		url='http://10.177.9.37:81/suichuan/document/list_doLogin.jsp?sysUserID=63904&sysUserCurrentEntityId=120204&sysUserBelongedEntityId=120104'
 
 
-		yield scrapy.Request(url=url,callback=self.parse20,meta={'cookiejar': 1},dont_filter=True)
+		yield scrapy.Request(url=url,callback=self.parse20,meta={'cookiejar': 1},dont_filter=True,headers=self.headers)
 
 
 
@@ -118,13 +121,13 @@ class LoadSpider(scrapy.Spider):
 
 				link = self.downloadby(docidstr)
 
-				yield scrapy.Request(url=link,callback=self.parse2,dont_filter=True,meta={'cookiejar': 1})
+				yield scrapy.Request(url=link,callback=self.parse2,dont_filter=True,meta={'cookiejar': 1},headers=self.headers)
 		else:
 
 			for docidstr in self.mydoc:
 				link = self.downloadby(docidstr)
 
-				yield scrapy.Request(url=link,callback=self.parse2,dont_filter=True,meta={'cookiejar': 1})
+				yield scrapy.Request(url=link,callback=self.parse2,dont_filter=True,meta={'cookiejar': 1},headers=self.headers)
 				pass
 
 	def downloadby(self, docidstr):
@@ -140,17 +143,20 @@ class LoadSpider(scrapy.Spider):
 		#biaoti = response.meta['biaoti']
 		file_nodes = response.xpath('//tr[@class="secondRightContent"]')
 		#print(len(file_nodes))
-
+		re_result = re.search(r"(202\d{1}-\d{2}-\d{2})",response.text)
+		date_time = '['+re_result.group(0)+']'
+		print(date_time)
 		for index, node in enumerate(file_nodes):
 			wenjianming = node.xpath('.//a/text()').get()
 			if index == 0:
-				biaoti = wenjianming
+				biaoti = date_time+wenjianming
 				pass
 			filepagelink = node.xpath('.//a/@href').get()
 			wenjianming = node.xpath('.//a/text()').get()
 			filepagelink = 'http://10.177.9.37:81/suichuan/document/'+filepagelink
 
-			yield scrapy.Request(url=filepagelink,callback=self.parse3,dont_filter=True,meta={'biaoti':biaoti,'wenjianming':wenjianming,'cookiejar': response.meta['cookiejar']})
+
+			yield scrapy.Request(url=filepagelink,callback=self.parse3,dont_filter=True,meta={'date_time':date_time,'biaoti':biaoti,'wenjianming':wenjianming,'cookiejar': response.meta['cookiejar']},headers=self.headers)
 		pass
 
 
@@ -158,7 +164,7 @@ class LoadSpider(scrapy.Spider):
 		print('==============================')
 
 		biaoti = response.meta['biaoti']
-
+		date_time = response.meta['date_time']
 		wenjianming = response.meta['wenjianming']
 
 		#print('=================='+str(wenjianming)+'==================')
@@ -222,8 +228,3 @@ class LoadSpider(scrapy.Spider):
 
 
 			print('下载成功')
-
-
-
-
-

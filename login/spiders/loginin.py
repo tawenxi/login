@@ -17,7 +17,7 @@ ffpath = os.path.abspath(os.path.join(fpath,".."))
 sys.path.append(fpath)
 
 import spiders.fpymysql.libmysql as mysqlhelper
-
+from spiders.fpymysql.gettext import *
 
 
 
@@ -36,7 +36,7 @@ class LogininSpider(scrapy.Spider):
         # 拼凑当前验证码对应的 url
         print("*"*20)
         img_url = 'http://10.177.9.37:81/suichuan/validateCode'
-        yield scrapy.Request(url=img_url, meta={'cookiejar': 1}, callback=self.parse_postdata,dont_filter=True)
+        yield scrapy.Request(url=img_url, meta={'cookiejar': 1}, callback=self.parse_postdata,dont_filter=True,headers=self.headers)
  
     def parse_postdata(self, response):
  
@@ -51,11 +51,13 @@ class LogininSpider(scrapy.Spider):
         fp = open('验证码.png', 'wb')
         fp.write(response.body)
         fp.close()
-        
-        image = Image.open('验证码.png')
-        image.show()
+        captcha = gettext()
+        captcha = captcha.replace('B', "8") 
+        print("识别验证码为："+captcha)
 
-        captcha = input("请输入验证码： ")
+
+
+
         # 完善 formdata中空着的 numcode
         form_data['validateCode'] = captcha
  
@@ -104,18 +106,18 @@ class LogininSpider(scrapy.Spider):
 
         print(f"{startdate}到{enddate}")
 
-        for x in range(1,10,1):
+        for x in range(1,25,1):
             url='http://10.177.9.37:81/suichuan/document/ifr_list_query.jsp?subFrame=queryReceive&Page={}&CFWDW=&beginDate={}&endDate={}&CZTC=&CBT=&CWENHAO=&doctype=&gwSDate=&gwEDate=&year=&docFrom=&docStatus=&sort=default&archiveType='.format(x,n_days,enddate)
                 
             print(url)
-            yield scrapy.Request(url=url,callback=self.parse2,dont_filter=True,meta={'cookiejar': response.meta['cookiejar']})
+            yield scrapy.Request(url=url,callback=self.parse2,dont_filter=True,meta={'cookiejar': response.meta['cookiejar']},headers=self.headers)
             pass
 
-        for x in range(1,5,1):
+        for x in range(1,25,1):
             url='http://10.177.9.37:81/suichuan/document/ifr_list_query.jsp?subFrame=queryReceive&Page={}&CFWDW=&beginDate=&endDate=&CZTC=&CBT=&CWENHAO=&doctype=&gwSDate=&gwEDate=&year=&docFrom=&docStatus=0&sort=default&archiveType='.format(x)
 
             print(url)
-            yield scrapy.Request(url=url,callback=self.parse2,dont_filter=True,meta={'cookiejar': response.meta['cookiejar']})
+            yield scrapy.Request(url=url,callback=self.parse2,dont_filter=True,meta={'cookiejar': response.meta['cookiejar']},headers=self.headers)
             pass
 
     def parse2(self, response):
@@ -149,3 +151,5 @@ class LogininSpider(scrapy.Spider):
             items['docid']=docid_str
             
             yield items
+
+        

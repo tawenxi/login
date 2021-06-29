@@ -9,12 +9,13 @@ from scrapy.http import Request,FormRequest
 import os
 import sys
 
+
 from PIL import Image
 fpath = os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
 ffpath = os.path.abspath(os.path.join(fpath,".."))
 
 sys.path.append(fpath)
-
+from spiders.fpymysql.gettext import *
 import spiders.fpymysql.libmysql as mysqlhelper
 
 
@@ -35,7 +36,7 @@ class LinkspiderSpider(scrapy.Spider):
 		# 拼凑当前验证码对应的 url
 		print("*"*20)
 		img_url = 'http://10.177.9.37:81/suichuan/validateCode'
-		yield scrapy.Request(url=img_url, meta={'cookiejar': 1}, callback=self.parse_postdata,dont_filter=True)
+		yield scrapy.Request(url=img_url, meta={'cookiejar': 1}, callback=self.parse_postdata,dont_filter=True,headers=self.headers)
 
 	def parse_postdata(self, response):
 
@@ -51,10 +52,11 @@ class LinkspiderSpider(scrapy.Spider):
 		fp.write(response.body)
 		fp.close()
 
-		image = Image.open('验证码.png')
-		image.show()
+		captcha = gettext()
+		captcha = captcha.replace('B', "8") 
+		print("识别验证码为："+captcha)
 
-		captcha = input("请输入验证码： ")
+		# captcha = input("请输入验证码： ")
 		# 完善 formdata中空着的 numcode
 		form_data['validateCode'] = captcha
 
@@ -65,7 +67,7 @@ class LinkspiderSpider(scrapy.Spider):
 	# 登录后继续使用该cookie信息去访问登录后才能访问的页面，就不会被拦截到登录页面了
 	def parse_afterlogin(self, response):
 		# 访问登陆后才能访问的页面http://i.mooc.chaoxing.com/settings/info?t=1594542872701
-		yield Request("http://10.177.9.37:81/suichuan/index.do", meta={'cookiejar': True}, callback=self.parse_manager,dont_filter=True)
+		yield Request("http://10.177.9.37:81/suichuan/index.do", meta={'cookiejar': True}, callback=self.parse_manager,dont_filter=True,headers=self.headers)
 
 
 	# 保存文件
@@ -99,7 +101,7 @@ class LinkspiderSpider(scrapy.Spider):
 
 				# url=self.url.format(j)
 				# print('begin')
-				yield scrapy.Request(url=url,callback=self.parse2,meta={'docid':line[0],'cookiejar': True},dont_filter=True)
+				yield scrapy.Request(url=url,callback=self.parse2,meta={'docid':line[0],'cookiejar': True},dont_filter=True,headers=self.headers)
 				# print(url)
 
 		except Exception as e:
