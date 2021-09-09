@@ -33,7 +33,7 @@ class LoadSpider(scrapy.Spider):
 	cookies = None
 	mydoc = None
 
-	headers={'Accept': 'text/html, application/xhtml+xml, */*','Referer': 'http://10.177.9.37:81/suichuan/index.do','Accept-Language': 'zh-CN','User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko','Accept-Encoding': 'gzip, deflate','Host': '10.177.9.37:81','Connection': 'Keep-Alive','Pragma': 'no-cache'} 
+	headers={'Host': '10.177.9.37:81','Connection': 'keep-alive','User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko','Accept': 'text/html, application/xhtml+xml, */*','Referer': 'http://10.177.9.37:81/suichuan/document/operation_form.jsp?NDOCID=148654004&NDOCSORTID=1&NPROCID=20&subFrame=doLogin&Page=0&dir=&newCPQB=&leaderId=0&nbfw=','Accept-Encoding': 'gzip, deflate','Accept-Language': 'zh-CN'} 
 
 
 	def __init__(self, mydoc=None, *args, **kwargs):
@@ -55,7 +55,7 @@ class LoadSpider(scrapy.Spider):
 		print("正在登录...................")
 		form_data = {
 			'loginName': 'liuxiaoyong',
-			'password': 'lml1989',
+			'password': 'xy965589',
 
 		}
 
@@ -143,7 +143,7 @@ class LoadSpider(scrapy.Spider):
 		#biaoti = response.meta['biaoti']
 		file_nodes = response.xpath('//tr[@class="secondRightContent"]')
 		#print(len(file_nodes))
-		re_result = re.search(r"(202\d{1}-\d{2}-\d{2})",response.text)
+		re_result = re.search(r"(20\d{2}-\d{2}-\d{2})",response.text)
 		date_time = '['+re_result.group(0)+']'
 		print(date_time)
 		for index, node in enumerate(file_nodes):
